@@ -1,11 +1,11 @@
 import Note from "../models/Note.js"
 export async function getAllNotes(req,res){
     try{
-  const notes=await Note.find()
+  const notes=await Note.find({isArchive:false})
   res.status(200).json(notes)
     }
     catch(error){
-        res.status.json({message:"Internal Server Error"})
+        res.status(500).json({message:"Internal Server Error"})
         console.error("Error in getAllNotes",error)
     }
 }
@@ -18,7 +18,7 @@ export async function createNote(req,res){
     }
     catch(error){
 
-        res.status.json({message:"Internal Server Error"})
+        res.status(500).json({message:"Internal Server Error"})
         console.error("Error in createNotes",error)
     }
 }
@@ -70,4 +70,73 @@ try{
         console.error("Error in createNotes",error)
     }
 }
+export async function archiveNote(req, res) {
+  try {
+    
 
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid Note ID format" });
+    }
+
+    const updatedNote = await Note.findByIdAndUpdate(
+      req.params.id,
+      { isArchive:true },
+      { new: true }
+    );
+
+    if (!updatedNote) {
+      return res.status(404).json({ message: "Note ID not found!" });
+    }
+
+    res.status(200).json({
+      message: "Note archived successfully",
+      updatedNote
+    });
+
+  } catch (error) {
+    console.error("Error in Archived", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+
+export async function getArchive(req,res){
+    try{
+  const notes=await Note.find({isArchive:true})
+  res.status(200).json(notes)
+    }
+    catch(error){
+        res.status.json({message:"Internal Server Error"})
+        console.error("Error in getAllNotes",error)
+    }
+}
+export async function restoreNote(req, res) {
+  try {
+    
+
+    // Validate ID format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid Note ID format" });
+    }
+
+    const updatedNote = await Note.findByIdAndUpdate(
+      req.params.id,
+      { isArchive:false },
+      { new: true }
+    );
+
+    if (!updatedNote) {
+      return res.status(404).json({ message: "Note ID not found!" });
+    }
+
+    res.status(200).json({
+      message: "Note restored successfully",
+      updatedNote
+    });
+
+  } catch (error) {
+    console.error("Error in Archived", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
